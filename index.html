@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OpenCode Session Header 生成器</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card-bg: #1a1d26;
+      --card-border: #2a2e3d;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --item-bg: #12141c;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px 16px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      background: var(--item-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 12px 16px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      flex: 1.5;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: #262b3a;
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:active {
+      background: #31374a;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .results-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--item-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .item-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .item-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      color: #38bdf8;
+      word-break: break-all;
+    }
+
+    .btn-copy-one {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .btn-copy-one:active, .btn-copy-one.copied {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>OpenCode Session 生成器</h1>
+      <p>批量生成符合官方规范的 Session Header</p>
+    </header>
+
+    <div class="card">
+      <div class="form-group grid-2">
+        <div>
+          <label>生成格式</label>
+          <select id="formatSelect">
+            <option value="uuid" selected>标准 UUID (推荐)</option>
+            <option value="ses_prefix">官方前缀 (ses_xxx)</option>
+            <option value="header_pair">完整 Header 键值对</option>
+            <option value="json_body">JSON 键值 (Body用)</option>
+          </select>
+        </div>
+        <div>
+          <label>生成数量</label>
+          <input type="number" id="countInput" min="1" max="100" value="5">
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-primary" id="generateBtn">
+          <span>⚡ 批量生成</span>
+        </button>
+        <button class="btn-secondary" id="copyAllBtn">
+          <span>📋 复制全部</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="results-header">
+      <span class="results-count" id="resultsCount">就绪</span>
+    </div>
+
+    <div class="list-container" id="resultsList"></div>
+  </div>
+
+  <div class="toast" id="toast">已复制到剪贴板</div>
+
+  <script>
+    function generateUUID() {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function generateSesPrefix() {
+      const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+      let result = 'ses_';
+      for (let i = 0; i < 26; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    let generatedItems = [];
+
+    const formatSelect = document.getElementById('formatSelect');
+    const countInput = document.getElementById('countInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyAllBtn = document.getElementById('copyAllBtn');
+    const resultsList = document.getElementById('resultsList');
+    const resultsCount = document.getElementById('resultsCount');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1800);
+    }
+
+    function copyToClipboard(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('已复制');
+        if (btnElement) {
+          const originalText = btnElement.textContent;
+          btnElement.textContent = '✓ 已复制';
+          btnElement.classList.add('copied');
+          setTimeout(() => {
+            btnElement.textContent = originalText;
+            btnElement.classList.remove('copied');
+          }, 1500);
+        }
+      }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('已复制');
+      });
+    }
+
+    function render() {
+      const count = Math.min(Math.max(parseInt(countInput.value, 10) || 5, 1), 100);
+      const format = formatSelect.value;
+      generatedItems = [];
+      resultsList.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        let rawVal = '';
+        let displayVal = '';
+        let copyVal = '';
+
+        if (format === 'ses_prefix') {
+          rawVal = generateSesPrefix();
+          displayVal = rawVal;
+          copyVal = rawVal;
+        } else if (format === 'header_pair') {
+          rawVal = generateUUID();
+          displayVal = `x-opencode-session: ${rawVal}`;
+          copyVal = `x-opencode-session: ${rawVal}`;
+        } else if (format === 'json_body') {
+          rawVal = generateUUID();
+          displayVal = `"x-opencode-session": "${rawVal}"`;
+          copyVal = `"x-opencode-session": "${rawVal}"`;
+        } else {
+          rawVal = generateUUID();
+          displayVal = rawVal;
+          copyVal = rawVal;
+        }
+
+        generatedItems.push(copyVal);
+
+        const card = document.createElement('div');
+        card.className = 'item-card';
+
+        const content = document.createElement('div');
+        content.className = 'item-content';
+
+        const label = document.createElement('div');
+        label.className = 'item-label';
+        label.textContent = `#${i + 1} - ${format === 'header_pair' ? 'Header 完整对' : (format === 'json_body' ? 'JSON 字段' : 'Header 值')}`;
+
+        const val = document.createElement('div');
+        val.className = 'item-value';
+        val.textContent = displayVal;
+
+        content.appendChild(label);
+        content.appendChild(val);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn-copy-one';
+        copyBtn.textContent = '复制';
+        copyBtn.onclick = () => copyToClipboard(copyVal, copyBtn);
+
+        card.appendChild(content);
+        card.appendChild(copyBtn);
+        resultsList.appendChild(card);
+      }
+
+      resultsCount.textContent = `共生成 ${count} 条记录`;
+    }
+
+    generateBtn.addEventListener('click', render);
+
+    copyAllBtn.addEventListener('click', () => {
+      if (!generatedItems.length) return;
+      const allText = generatedItems.join('\n');
+      copyToClipboard(allText, null);
+      showToast(`已复制全部 ${generatedItems.length} 条`);
+    });
+
+    render();
+  </script>
+</body>
+</html>
